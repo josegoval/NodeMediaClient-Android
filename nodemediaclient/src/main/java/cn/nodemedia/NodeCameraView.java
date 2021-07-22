@@ -116,6 +116,7 @@ public class NodeCameraView extends FrameLayout implements GLSurfaceView.Rendere
             Log.w(TAG, "startPreview setParameters:" + e.getMessage());
         }
 
+
         mGLSurfaceView = new GLSurfaceView(mContext);
         mGLSurfaceView.setEGLContextClientVersion(2);
         mGLSurfaceView.setRenderer(this);
