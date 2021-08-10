@@ -42,30 +42,30 @@ public class NodeCameraView extends FrameLayout implements GLSurfaceView.Rendere
     private boolean isAutoFocus = true;
     private int mCameraId = 0;
     private int mCameraNum = 0;
-    private int mCameraWidth;
-    private int mCameraHeight;
+    private int mCameraWidth = 1920;
+    private int mCameraHeight = 1080;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
     private NodeCameraViewCallback mNodeCameraViewCallback;
     private boolean isMediaOverlay = false;
 
-    public NodeCameraView( Context context) {
+    public NodeCameraView(Context context) {
         super(context);
         initView(context);
     }
 
-    public NodeCameraView(Context context,  AttributeSet attrs) {
+    public NodeCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView(context);
     }
 
-    public NodeCameraView(Context context,  AttributeSet attrs,  int defStyleAttr) {
+    public NodeCameraView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView(context);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public NodeCameraView(Context context,  AttributeSet attrs,  int defStyleAttr,  int defStyleRes) {
+    public NodeCameraView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initView(context);
     }
@@ -99,6 +99,11 @@ public class NodeCameraView extends FrameLayout implements GLSurfaceView.Rendere
         return mGLSurfaceView;
     }
 
+    public void setCameraSize(int width, int height) {
+        this.mCameraWidth = width;
+        this.mCameraHeight = height;
+    }
+
     public int startPreview(int cameraId) {
         if (isStarting) return -1;
         try {
@@ -109,7 +114,7 @@ public class NodeCameraView extends FrameLayout implements GLSurfaceView.Rendere
         }
         try {
             Camera.Parameters para = mCamera.getParameters();
-            choosePreviewSize(para, 1920, 1080);
+            choosePreviewSize(para, this.mCameraWidth, this.mCameraHeight);
             mCamera.setParameters(para);
             setAutoFocus(this.isAutoFocus);
         } catch (Exception e) {
@@ -176,16 +181,19 @@ public class NodeCameraView extends FrameLayout implements GLSurfaceView.Rendere
     }
 
     private void choosePreviewSize(Camera.Parameters parms, int width, int height) {
-        Camera.Size ppsfv = parms.getPreferredPreviewSizeForVideo();
-        if (ppsfv != null) {
-            Log.d(TAG, "Camera preferred preview size for video is " + ppsfv.width + "x" + ppsfv.height);
-        }
-
         for (Camera.Size size : parms.getSupportedPreviewSizes()) {
             if (size.width == width && size.height == height) {
                 parms.setPreviewSize(width, height);
                 return;
             }
+        }
+
+        Camera.Size ppsfv = parms.getPreferredPreviewSizeForVideo();
+        if (ppsfv != null) {
+            this.mCameraWidth = ppsfv.width;
+            this.mCameraHeight = ppsfv.height;
+            Log.d(TAG, "Camera preferred preview size for video is " + ppsfv.width + "x" + ppsfv.height);
+            parms.setPreviewSize(this.mCameraWidth, this.mCameraHeight);
         }
     }
 
@@ -260,7 +268,7 @@ public class NodeCameraView extends FrameLayout implements GLSurfaceView.Rendere
 
         try {
             Camera.Parameters para = mCamera.getParameters();
-            choosePreviewSize(para, 1280, 720);
+            choosePreviewSize(para, mCameraWidth, mCameraHeight);
             mCamera.setParameters(para);
         } catch (Exception e) {
             Log.w(TAG, "switchCamera setParameters:" + e.getMessage());
